@@ -1,0 +1,42 @@
+{
+  "name": "crypto-api",
+  "version": "1.0.0",
+  "description": "Production-ready crypto market backend using Binance stream, Redis cache, and MongoDB snapshots",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "seed": "node src/scripts/seedCoins.js",
+    "seed:demo": "node src/scripts/seedCoins.js --demo",
+    "update-metadata": "node src/scripts/updateMetadata.js",
+    "maintain": "node src/scripts/maintainCache.js",
+    "redis:up": "docker run --name crypto-redis -p 6379:6379 -d redis:7",
+    "redis:start": "docker start crypto-redis"
+  },
+  "keywords": [
+    "crypto",
+    "binance",
+    "redis",
+    "mongodb",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^17.4.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.3.2",
+    "cors": "^2.8.5",
+    "mongoose": "^9.4.1",
+    "morgan": "^1.10.1",
+    "node-cron": "^4.2.1",
+    "redis": "^5.11.0",
+    "axios": "^1.12.2",
+    "sharp": "^0.34.5",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
