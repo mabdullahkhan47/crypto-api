@@ -33,14 +33,15 @@ async function analyzeLogoColor(imageUrl) {
 }
 
 async function analyzeLogoBatch(coins, concurrency = 15) {
-  const need = coins.filter((c) => c.image && !c.logo_color);
+  const need = coins.filter((c) => (c.logo || c.image) && !c.logo_color);
   if (need.length === 0) return;
 
   for (let i = 0; i < need.length; i += concurrency) {
     const batch = need.slice(i, i + concurrency);
     await Promise.all(
       batch.map(async (coin) => {
-        const color = await analyzeLogoColor(coin.image);
+        const imageUrl = coin.logo || coin.image;
+        const color = await analyzeLogoColor(imageUrl);
         if (color) coin.logo_color = color;
       })
     );

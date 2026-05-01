@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 
 const coinSchema = new mongoose.Schema(
   {
+    id: {
+      type: String,
+      trim: true,
+      index: true,
+    },
     name: {
       type: String,
       required: true,
@@ -26,6 +31,62 @@ const coinSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    image: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+    logo_color: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+    price: {
+      type: Number,
+      min: 0,
+      default: null,
+    },
+    market_cap: {
+      type: Number,
+      min: 0,
+      default: null,
+    },
+    volume: {
+      type: Number,
+      min: 0,
+      default: null,
+    },
+    percent_change_1h: {
+      type: Number,
+      default: null,
+    },
+    percent_change_24h: {
+      type: Number,
+      default: null,
+    },
+    percent_change_7d: {
+      type: Number,
+      default: null,
+    },
+    percent_change_30d: {
+      type: Number,
+      default: null,
+    },
+    percent_change_1y: {
+      type: Number,
+      default: null,
+    },
+    rank: {
+      type: Number,
+      min: 0,
+      default: null,
+      index: true,
+    },
+    last_updated: {
+      type: String,
+      trim: true,
+      default: null,
+    },
     circulating_supply: {
       type: Number,
       required: true,
@@ -35,6 +96,11 @@ const coinSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 0,
+    },
+    max_supply: {
+      type: Number,
+      min: 0,
+      default: null,
     },
     source_rank: {
       type: Number,

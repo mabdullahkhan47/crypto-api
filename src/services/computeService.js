@@ -71,11 +71,13 @@ async function buildComputedCoins() {
   const symbols = coins.map((coin) => normalizeSymbol(coin.symbol));
   const pairs = coins.map((coin) => normalizeSymbol(coin.binance_pair) || toBinancePair(coin.symbol));
 
-  const [liveTickerMap, history1h, history24h, history7d] = await Promise.all([
+  const [liveTickerMap, history1h, history24h, history7d, history30d, history1y] = await Promise.all([
     getLiveTickersBySymbols(pairs),
     getHistoricalPriceMap(symbols, 60),
     getHistoricalPriceMap(symbols, 60 * 24),
     getHistoricalPriceMap(symbols, 60 * 24 * 7),
+    getHistoricalPriceMap(symbols, 60 * 24 * 30),
+    getHistoricalPriceMap(symbols, 60 * 24 * 365),
   ]);
 
   const computed = [];
@@ -97,6 +99,8 @@ async function buildComputedCoins() {
     const computedChange1h = calculatePercentChange(price, history1h.get(symbol));
     const computedChange24h = calculatePercentChange(price, history24h.get(symbol));
     const computedChange7d = calculatePercentChange(price, history7d.get(symbol));
+    const computedChange30d = calculatePercentChange(price, history30d.get(symbol));
+    const computedChange1y = calculatePercentChange(price, history1y.get(symbol));
 
     computed.push({
       name: coin.name,
@@ -107,6 +111,8 @@ async function buildComputedCoins() {
       change_1h: computedChange1h ?? safeNumber(coin.source_change_1h, null),
       change_24h: computedChange24h ?? safeNumber(coin.source_change_24h, null),
       change_7d: computedChange7d ?? safeNumber(coin.source_change_7d, null),
+      change_30d: computedChange30d,
+      change_1y: computedChange1y,
       market_cap: marketCap,
       volume: round(volume > 0 ? volume : safeNumber(coin.source_volume_24h), 2),
       source_rank: safeNumber(coin.source_rank, null),

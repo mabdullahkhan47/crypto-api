@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const { connectDB } = require("../config/db");
 const Coin = require("../models/coinModel");
+const { materializeOnce } = require("../jobs/materializeJob");
 const { normalizeSymbol, safeNumber } = require("../utils/helpers");
 const { loadCachedMetadata } = require("../utils/metadataUtils");
 
@@ -239,8 +240,12 @@ async function buildRealCoins() {
     const ticker = binanceTickerMap.get(pairInfo.pairSymbol);
 
     if (metadata) {
+      // Generate unique id from name or symbol
+      const id = (metadata.name ? String(metadata.name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") : null) || 
+                 String(symbol).toLowerCase();
       // Merge cached metadata with live Binance ticker data
       merged.push({
+        id,
         name: metadata.name,
         symbol,
         binance_pair: pairInfo.pairSymbol,
@@ -248,6 +253,7 @@ async function buildRealCoins() {
         logo: metadata.logo,
         circulating_supply: safeNumber(metadata.circulating_supply),
         total_supply: safeNumber(metadata.total_supply),
+        max_supply: safeNumber(metadata.max_supply, null),
         source_rank: safeNumber(metadata.rank, null),
         source_market_cap: 0, // Will be computed from price * supply
         source_price: safeNumber(ticker?.lastPrice),
@@ -260,7 +266,9 @@ async function buildRealCoins() {
     }
 
     // Fallback: Binance-only asset when cached metadata unavailable
+    const id = String(symbol).toLowerCase();
     merged.push({
+      id,
       name: symbol,
       symbol,
       binance_pair: pairInfo.pairSymbol,
@@ -268,6 +276,7 @@ async function buildRealCoins() {
       logo: `https://placehold.co/64x64?text=${encodeURIComponent(symbol)}`,
       circulating_supply: 0,
       total_supply: 0,
+      max_supply: null,
       source_rank: null,
       source_market_cap: 0,
       source_price: safeNumber(ticker?.lastPrice),
@@ -323,6 +332,12 @@ async function run() {
   }
 
   const result = await upsertCoins(coins);
+
+  try {
+    await materializeOnce();
+  } catch (error) {
+    console.warn("[Seed] Materialize pass failed:", error.message || error);
+  }
 
   console.log("[Seed] Complete", {
     mode: useDemo ? "demo" : "real",
